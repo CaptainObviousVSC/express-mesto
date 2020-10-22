@@ -4,6 +4,7 @@ const jsonDataPath = path.join(__dirname, '..', 'data', 'users.json')
 
 const getUsers = (req, res) => {
   readFile(jsonDataPath).then(data => res.send(data))
+  .catch(() => res.status(500).send({ "mesage": "Файл с данными не найден" })
 }
 const getUser = (req, res) => {
   const { _id } = req.params
