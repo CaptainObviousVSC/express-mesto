@@ -1,21 +1,18 @@
-const path = require('path');
-const readFile = require('../utils/read-files');
-
-const jsonDataPath = path.join(__dirname, '..', 'data', 'users.json');
+const User = require('../models/user');
 
 const getUsers = (req, res) => {
-  readFile(jsonDataPath).then((data) => res.send(data)).catch(() => res.status(500).send({ message: 'Файл с данными не найден' }));
+  User.find({}).then((data) => res.send(data)).catch(() => res.status(500).send({ message: 'Файл с данными не найден' }));
 };
 const getUser = (req, res) => {
-  const { _id } = req.params;
-  readFile(jsonDataPath).then((data) => {
-    const userToFind = data.find((user) => user._id === _id);
-    return userToFind;
-  }).then((user) => {
+  User.findById(req.params._id).then((user) => {
     if (!user) {
       return res.status(404).send({ message: 'Пользователь не найден' });
     }
-    return res.send(user);
-  });
+    return res.status(200).send(user);
+  }).catch(() => res.status(500).send({ message: 'Файл с данными не найден' }));
 };
-module.exports = { getUsers, getUser };
+const postUsers = (req, res) => {
+  const { name, about, avatar } = req.body;
+  User.create({ name, about, avatar }).then((user) => res.send(user)).catch(() => res.status(500).send({ message: 'Файл с данными не найден' }));
+};
+module.exports = { getUsers, getUser, postUsers };
