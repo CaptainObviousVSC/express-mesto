@@ -17,9 +17,7 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     required: true,
-    validate: {
-      validator,
-    },
+    validate: validator,
   },
 });
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('user', userSchema);
