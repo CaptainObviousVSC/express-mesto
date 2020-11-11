@@ -70,19 +70,15 @@ const deleteLike = (req, res) => {
 const postCards = (req, res) => {
   const { name, link } = req.body;
   const { _id } = req.user;
-  Card.create({ name, link, owner: _id }).orFail(() => {
-    const err = new Error('Невозможно создать карточку');
-    err.statusCode = 404;
-    throw err;
-  }).then((card) => res.send(card))
+  Card.create({ name, link, owner: _id }).then((card) => res.send(card))
     .catch((err) => {
-      if (err.kind === 'ObjectId') {
-        return res.status(400).send({ message: 'Невалидный ID' });
+      if (err.name === 'ValidationError') {
+        const errorList = Object.keys(err.errors);
+        const messages = errorList.map((item) => err.errors[item].message);
+        res.status(400).send({ message: `Ошибка валидации: ${messages.join(' ')}` });
+      } else {
+        res.status(500).send({ message: 'Ошибка на сервере' });
       }
-      if (err.statusCode === 404) {
-        return res.status(404).send({ message: 'Невозможно создать карточку' });
-      }
-      return res.status(500).send({ message: 'Ошибка сервера' });
     });
 };
 module.exports = {

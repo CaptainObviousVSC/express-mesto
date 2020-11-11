@@ -41,13 +41,13 @@ const updateUserAvatar = (req, res) => {
     throw err;
   }).then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.kind === 'ObjectId') {
-        return res.status(400).send({ message: 'Невалидная ссылка' });
+      if (err.name === 'ValidationError') {
+        const errorList = Object.keys(err.errors);
+        const messages = errorList.map((item) => err.errors[item].message);
+        res.status(400).send({ message: `Ошибка валидации: ${messages.join(' ')}` });
+      } else {
+        res.status(500).send({ message: 'Ошибка на сервере' });
       }
-      if (err.statusCode === 404) {
-        return res.status(404).send({ message: 'Невозможно обновить аватар' });
-      }
-      return res.status(500).send({ message: 'Ошибка сервера' });
     });
 };
 const updateUser = (req, res) => {
@@ -59,30 +59,26 @@ const updateUser = (req, res) => {
     throw err;
   }).then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.kind === 'ObjectId') {
-        return res.status(400).send({ message: 'Невалидное имя или описание' });
+      if (err.name === 'ValidationError') {
+        const errorList = Object.keys(err.errors);
+        const messages = errorList.map((item) => err.errors[item].message);
+        res.status(400).send({ message: `Ошибка валидации: ${messages.join(' ')}` });
+      } else {
+        res.status(500).send({ message: 'Ошибка на сервере' });
       }
-      if (err.statusCode === 404) {
-        return res.status(404).send({ message: 'Невозможно обновить пользователя' });
-      }
-      return res.status(500).send({ message: 'Ошибка сервера' });
     });
 };
 const postUsers = (req, res) => {
   const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar }).orFail(() => {
-    const err = new Error('Невозможно добавить пользователя');
-    err.statusCode = 404;
-    throw err;
-  }).then((user) => res.send(user))
+  User.create({ name, about, avatar }).then((user) => res.send(user))
     .catch((err) => {
-      if (err.kind === 'ObjectId') {
-        return res.status(400).send({ message: 'Невалидные имя или описание или аватар' });
+      if (err.name === 'ValidationError') {
+        const errorList = Object.keys(err.errors);
+        const messages = errorList.map((item) => err.errors[item].message);
+        res.status(400).send({ message: `Ошибка валидации: ${messages.join(' ')}` });
+      } else {
+        res.status(500).send({ message: 'Ошибка на сервере' });
       }
-      if (err.statusCode === 404) {
-        return res.status(404).send({ message: 'Невозможно добавить пользователя' });
-      }
-      return res.status(500).send({ message: 'Ошибка сервера' });
     });
 };
 module.exports = {
