@@ -57,12 +57,15 @@ const updateUser = (req, res) => {
     const err = new Error('Невозможно обновить пользователя');
     err.statusCode = 404;
     throw err;
-  }).then((user) => res.send({ data: user }))
+  })
+    .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         const errorList = Object.keys(err.errors);
         const messages = errorList.map((item) => err.errors[item].message);
         res.status(400).send({ message: `Ошибка валидации: ${messages.join(' ')}` });
+      } else if (err.reason === null) {
+        res.status(400).send({ message: 'Неподходящий тип данных' });
       } else {
         res.status(500).send({ message: 'Ошибка на сервере' });
       }
